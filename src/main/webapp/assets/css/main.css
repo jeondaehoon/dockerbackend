@@ -1,0 +1,33 @@
+.logo img {
+    width: 125px;
+    height: auto; /* 비율 유지 */
+    object-fit: none;
+    overflow: visible;
+    transform: scale(0.3); /* 50% 축소 */
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-family: 'Freight Sans', sans-serif;
+    background-color: #f7f7f7;
+}
+
+.pagetitle{
+    margin-top: 30px;
+}
+
+.h1-title{
+    margin-bottom: 50PX;
+}
+
+.form-control {
+    width: 300px;
+}
+
+.modal-body .form-control {
+    width: 100%;
+}
+
+
+

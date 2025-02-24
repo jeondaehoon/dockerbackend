@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.camperxoffice.order.dao.orderDao">
+
+    <resultMap id="orderMap" type="com.vo.order.OrderVO">
+        <result column="ORD_CODE" property="ordCode"/>
+        <result column="USER_ID" property="userId"/>
+        <result column="PRD_NAME" property="prdName"/>
+        <result column="BUY_QTY" property="buyQty"/>
+        <result column="RETURN_STATUS" property="returnStatus"/>
+        <result column="USER_NAME" property="userName"/>
+        <result column="ORDER_STATUS" property="ordStatus"/>
+        <result column="TOTAL_PRICE" property="totalPrice"/>
+        <result column="PRD_CODE" property="prdCode"/>
+        <result column="PRD_COLOR" property="prdColor"/>
+        <result column="GR_CODE" property="grCode"/>
+        <result column="COM_CODE" property="comCode"/>
+        <result column="COM_NAME" property="comName"/>
+        <result column="USER_ADDRESS" property="userAddress"/>
+        <result column="RETURN_DATE" property="returnDate"/>
+        <result column="RETURN_REQ" property="returnReq"/>
+    </resultMap>
+
+    <select id="setorderSearch" resultMap="orderMap">
+        SELECT
+            ORD_CODE,
+            USER_NAME,
+            USER_ID,
+            PRD_NAME,
+            BUY_QTY,
+            RETURN_STATUS,
+            ORDER_STATUS
+        FROM ORDER_INFO
+        WHERE 1=1
+    </select>
+
+    <update id="orderShipped">
+        UPDATE ORDER_INFO
+        SET ORDER_STATUS = '상품 준비중'
+        WHERE ORD_CODE = #{ordCode}
+    </update>
+
+    <update id="orderDelivered">
+        UPDATE ORDER_INFO
+        SET ORDER_STATUS = '상품 배송완료'
+        WHERE ORD_CODE = #{ordCode}
+    </update>
+
+    <select id="HistoryList" resultMap="orderMap">
+        SELECT
+            ORD_CODE,
+            USER_NAME,
+            PRD_NAME,
+            BUY_QTY,
+            ORDER_STATUS
+        FROM ORDER_INFO
+        WHERE ORDER_STATUS = '배송완료'
+    </select>
+
+    <select id="ReturnList" resultMap="orderMap">
+        SELECT
+            ORD_CODE,
+            USER_ID,
+            USER_NAME,
+            PRD_NAME,
+            BUY_QTY,
+            ORDER_STATUS
+        FROM ORDER_INFO
+        WHERE RETURN_STATUS = 'Y'
+    </select>
+
+    <update id="orderupdate">
+        UPDATE ORDER_INFO
+        SET ORDER_STATUS = '처리중'
+        WHERE ORD_CODE = #{ordCode}
+    </update>
+
+    <select id="setReactOrdSearch" resultMap="orderMap">
+        SELECT
+            A.ORD_CODE,
+            B.USER_NAME,
+            C.PRD_NAME,
+            A.BUY_QTY,
+            (A.BUY_QTY * C.PRICE) AS TOTAL_PRICE,
+            D.COM_NAME
+        FROM ORDER_INFO A
+                 JOIN USER_INFO B ON A.USER_ID = B.USER_ID
+                 JOIN PRD_INFO C ON A.PRD_CODE = C.PRD_CODE
+                 JOIN MGCODE_INFO D ON A.ORDER_STATUS = D.COM_CODE
+        WHERE D.COM_CODE IN ('OS-O01', 'OS-O02')
+    </select>
+
+    <select id="setReactOrderDetails" resultMap="orderMap">
+        SELECT
+            A.BUY_QTY,
+            B.PRD_CODE,
+            B.PRD_NAME,
+            B.PRD_COLOR
+        FROM ORDER_INFO A
+         JOIN PRD_INFO B ON A.PRD_CODE = B.PRD_CODE
+        WHERE A.ORD_CODE = #{ordCode}
+    </select>
+
+    <select id="setReactorderHistory" resultMap="orderMap">
+        SELECT
+            A.ORD_CODE,
+            A.BUY_QTY,
+            D.COM_NAME,
+            B.USER_NAME,
+            C.PRD_NAME,
+            (A.BUY_QTY * C.PRICE) AS TOTAL_PRICE
+        FROM ORDER_INFO A
+                 JOIN USER_INFO B ON A.USER_ID = B.USER_ID
+                 JOIN PRD_INFO C ON A.PRD_CODE = C.PRD_CODE
+                 JOIN MGCODE_INFO D ON A.COM_CODE = D.COM_CODE
+        WHERE D.COM_CODE = 'OS-O03'
+    </select>
+
+    <update id="setReactShipped">
+        UPDATE ORDER_INFO
+        SET COM_CODE = 'OS-O02'
+        WHERE ORD_CODE = #{ordCode}
+    </update>
+
+    <update id="setReactDelivered">
+        UPDATE ORDER_INFO
+        SET COM_CODE = 'OS-O03'
+        WHERE ORD_CODE = #{ordCode}
+    </update>
+
+    <select id="setReactcancelsearch" resultMap="orderMap">
+        SELECT
+            A.ORD_CODE,
+            A.BUY_QTY,
+            B.USER_NAME,
+            C.PRD_NAME,
+            D.COM_NAME,
+            (A.BUY_QTY * C.PRICE) AS TOTAL_PRICE
+        FROM ORDER_INFO A
+                 JOIN USER_INFO B ON A.USER_ID = B.USER_ID
+                 JOIN PRD_INFO C ON A.PRD_CODE = C.PRD_CODE
+                 JOIN MGCODE_INFO D ON A.COM_CODE = D.COM_CODE
+        WHERE D.COM_CODE IN ('OS-O04','OS-O05')
+    </select>
+
+    <select id="setReactcancelsDetails" resultMap="orderMap">
+        SELECT
+            B.USER_NAME,
+            B.USER_ADDRESS,
+            C.RETURN_DATE,
+            C.RETURN_REQ,
+            D.COM_NAME
+        FROM ORDER_INFO A
+                 JOIN USER_INFO B ON A.USER_ID = B.USER_ID
+                 JOIN CANCEL_INFO C ON A.ORD_CODE =  C.ORD_CODE
+                 JOIN MGCODE_INFO D ON C.COM_CODE = D.COM_CODE
+        WHERE A.ORD_CODE = #{ordCode}
+    </select>
+
+    <update id="setReactupdateCanceling">
+        UPDATE ORDER_INFO
+        SET COM_CODE = 'OS-O04'
+        WHERE ORD_CODE = #{ordCode}
+    </update>
+
+    <update id="setReactupdateCancelend">
+        UPDATE ORDER_INFO
+        SET COM_CODE = 'OS-O05'
+        WHERE ORD_CODE = #{ordCode}
+    </update>
+</mapper>

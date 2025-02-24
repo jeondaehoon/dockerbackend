@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.camperxoffice.chart.dao.chartDao">
+    <resultMap id="ChartMap" type="com.vo.react.ChartVO">
+        <result column="YEAR" property="year"/>
+        <result column="WEEK_NUMBER" property="weekNumber"/>
+        <result column="TOTAL_QTY" property="totalQty"/>
+        <result column="TOTAL_SALES" property="totalSales"/>
+        <result column="SALES_STATUS" property="salesStatus"/>
+        <result column="COM_NAME" property="comName"/>
+        <result column="PRD_CODE" property="prdCode"/>
+        <result column="PRD_NAME" property="prdName"/>
+        <result column="PRICE" property="price"/>
+        <result column="CAT_NAME" property="catName"/>
+        <result column="PRD_STATUS" property="prdStatus"/>
+        <result column="PRD_QTY" property="prdQty"/>
+    </resultMap>
+
+    <select id="setreactSalesChart" resultMap="ChartMap">
+        SELECT D.*, E.COM_NAME
+        FROM (
+                 SELECT
+                     TO_CHAR(TO_DATE(A.ORD_DATE, 'YYYY-MM-DD'), 'YY') AS year,
+            TO_CHAR(TO_DATE(A.ORD_DATE, 'YYYY-MM-DD'), 'IW') AS week_number,
+            SUM(A.BUY_QTY) AS TOTAL_QTY,
+            SUM(B.PRICE * A.BUY_QTY) AS TOTAL_SALES,
+            CASE
+                WHEN SUM(B.PRICE * A.BUY_QTY) > 1000000 THEN 'CH-C01'
+                WHEN SUM(B.PRICE * A.BUY_QTY) = 1000000 THEN 'CH-C02'
+                ELSE 'CH-C03'
+            END AS SALES_STATUS
+                 FROM ORDER_INFO A
+                     JOIN PRD_INFO B ON A.PRD_CODE = B.PRD_CODE
+                 WHERE A.ORDER_STATUS = 'OS-O03'
+                 GROUP BY TO_CHAR(TO_DATE(A.ORD_DATE, 'YYYY-MM-DD'), 'YY'),
+                     TO_CHAR(TO_DATE(A.ORD_DATE, 'YYYY-MM-DD'), 'IW')
+             ) D
+                 JOIN MGCODE_INFO E ON D.SALES_STATUS = E.COM_CODE  -- 수정된 부분: JOIN 사용
+    </select>
+
+    <select id="setreactstockChart" resultMap="ChartMap">
+        SELECT
+            A.PRD_CODE,
+            A.PRD_NAME,
+            A.PRICE,
+            B.CAT_NAME,
+            A.PRD_STATUS,
+            A.PRD_QTY
+        FROM PRD_INFO A
+                 JOIN CAT_INFO B ON A.CAT_CODE = B.CAT_CODE
+    </select>
+</mapper>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.camperxoffice.stock.dao.stockDao">
+
+    <resultMap type= "com.vo.stock.StockVO" id="StockMap">
+        <result column="PRD_CODE" property="prdCode"/>
+        <result column="STOCK_SEQ" property="stockSeq"/>
+        <result column="STOCK_DATE" property="stockDate"/>
+        <result column="PRICE" property="price"/>
+        <result column="PRD_QTY" property="prdQty"/>
+        <result column="STOCK_STATUS" property="stockStatus"/>
+        <result column="PRD_NAME" property="prdName"/>
+        <result column="SAFETY_STOCK" property="safetyStock"/>
+        <result column="NOTES" property="notes"/>
+        <result column="IN_CHATGE" property="inChatge"/>
+        <result column="PURCHASE_QTY" property="purchaseQty"/>
+        <result column="CAT_NAME" property="catName"/>
+        <result column="COM_NAME" property="comName"/>
+    </resultMap>
+
+    <resultMap id="catMap" type="com.vo.category.CatVO">
+        <result column="CAT_CODE" property="catCode"/>
+        <result column="CAT_NAME" property="catName"/>
+        <result column="CAT_LV" property="catLv"/>
+        <result column="CAT_UPLV" property="catUplv"/>
+        <result column="DEL_STATUS" property="delStatus"/>
+        <result column="CAT_INDATE" property="catIndate"/>
+    </resultMap>
+
+    <resultMap id="prdMap" type="com.vo.product.PrdVO">
+        <result column="PRD_CODE" property="prdCode"/>
+        <result column="PRD_NAME" property="prdName"/>
+        <result column="PRD_COLOR" property="prdColor"/>
+        <result column="PRICE" property="price"/>
+        <result column="PRD_DESC" property="prdDesc"/>
+        <result column="PRD_IMG" property="prdImg"/>
+        <result column="SAFETY_STOCK" property="safetyStock"/>
+        <result column="CAT_CODE" property="catCode"/>
+        <result column="PRD_QTY" property="prdQty"/>
+        <result column="CAT_NAME" property="catName"/>
+        <result column="PRD_STATUS" property="prdStatus"/>
+        <result column="COM_NAME" property="comName"/>
+    </resultMap>
+
+    <resultMap id="reactStockMap" type="com.vo.product.PrdVO">
+        <result column="PRD_CODE" property="prdCode"/>
+        <result column="PRD_NAME" property="prdName"/>
+        <result column="PRICE" property="price"/>
+        <result column="CAT_NAME" property="catName"/>
+        <result column="COM_NAME" property="comName"/>
+        <result column="CL_NAME" property="clName"/>
+        <result column="IMG_URL" property="imgUrl"/>
+        <result column="PRD_DESC" property="prdDesc"/>
+        <result column="PRD_QTY" property="prdQty"/>
+        <result column="SAFETY_STOCK" property="safetyStock"/>
+        <result column="PRD_IMG" property="prdImg"/>
+        <result column="STOCK_DATE" property="stockDate"/>
+        <result column="PURCHASE_QTY" property="purchaseQty"/>
+        <result column="IN_CHATGE" property="inChatge"/>
+        <result column="NOTES" property="notes"/>
+    </resultMap>
+
+
+    <select id="selectCatList" resultMap="catMap">
+        SELECT
+            CAT_CODE,
+            CAT_NAME,
+            CAT_LV,
+            CAT_UPLV,
+            DEL_STATUS,
+            CAT_INDATE
+        FROM CAT_INFO
+        WHERE 1=1
+        <if test="catUplv != null and catUplv !='' ">
+            AND CAT_UPLV = #{catUplv}
+        </if>
+        ORDER BY CAT_NAME
+    </select>
+
+    <select id="selectMaxPrdCode" resultType="String">
+        select 'SKU' || TO_CHAR(SYSDATE, 'YYMMDD') || LPAD(NVL((SELECT MAX(TO_NUMBER(SUBSTR(PRD_CODE, -4))) + 1
+            FROM PRD_INFO
+            WHERE PRD_CODE LIKE 'SKU' || TO_CHAR(SYSDATE, 'YYMMDD') || '%'), 1), 4, '0')
+        from DUAL
+    </select>
+    <insert id="SavePrdInfo">
+        INSERT INTO PRD_INFO (PRD_NAME, PRD_CODE, PRICE, PRD_COLOR, PRD_QTY, PRD_DESC, PRD_IMG, SAFETY_STOCK, CAT_CODE, PRD_STATUS)
+        VALUES (#{prdName},
+                #{prdCode},
+                #{price},
+                #{prdColor},
+                #{prdQty},
+                #{prdDesc},
+                #{prdImg},
+                #{safetyStock},
+                #{catCode},
+                'PD-P01'
+               )
+    </insert>
+
+    <insert id="SaveSubImg">
+        INSERT INTO IMG_INFO (PRD_CODE, IMG_SEQ, IMG_URL)
+        VALUES (#{prdCode},
+                (SELECT NVL(MAX(IMG_SEQ), 0) + 1 FROM IMG_INFO WHERE PRD_CODE = #{prdCode}),
+                #{prdSubimg})
+    </insert>
+
+
+
+
+    <select id="setStockList" resultMap="prdMap">
+        SELECT
+            PRD_CODE,
+            PRD_NAME,
+            CAT_CODE,
+            PRICE,
+            PRD_STATUS
+        FROM PRD_INFO
+        WHERE 1=1
+    </select>
+
+    <select id="setStockListinfo" resultMap="StockMap">
+        SELECT
+            A.PRD_CODE,
+            B.PRD_NAME,
+            A.PRD_QTY,
+            B.SAFETY_STOCK,
+            A.STOCK_STATUS
+        FROM STOCK_INFO A
+        JOIN PRD_INFO B
+        ON A.PRD_CODE = B.PRD_CODE
+        WHERE 1 = 1
+    </select>
+
+    <select id="setStockDateLog" resultMap="StockMap">
+        SELECT
+            A.STOCK_DATE,
+            A.PRD_CODE,
+            B.PRD_NAME,
+            C.PURCHASE_QTY,
+            D.IN_CHATGE,
+            A.NOTES
+        FROM STOCK_INFO A
+             JOIN PRD_INFO B ON A.PRD_CODE = B.PRD_CODE
+             JOIN PURCHASE_INFO C ON A.PRD_CODE = C.PRD_CODE
+             JOIN VENDOR_INFO D ON C.VENDOR_CODE = D.VENDOR_CODE
+    </select>
+
+    <select id="setreactStockSearch" resultMap="reactStockMap">
+        SELECT
+            A.PRD_CODE,
+            A.PRD_NAME,
+            A.PRICE,
+            B.CAT_NAME,
+            C.COM_NAME
+        FROM PRD_INFO A
+                 JOIN CAT_INFO B ON A.CAT_CODE = B.CAT_CODE
+                 JOIN MGCODE_INFO C ON A.PRD_STATUS = C.COM_CODE
+        WHERE 1 = 1
+    </select>
+
+    <select id="setreactStockDetails" resultMap="reactStockMap">
+        SELECT
+            A.PRD_IMG,
+            A.PRD_DESC,
+            A.SAFETY_STOCK,
+            A.PRD_QTY,
+            B.CL_NAME,
+            LISTAGG(C.IMG_URL, ', ') WITHIN GROUP (ORDER BY C.IMG_URL) AS IMG_URL
+        FROM PRD_INFO A
+            JOIN COLOR_INFO B ON A.PRD_CODE = B.PRD_CODE
+            JOIN IMG_INFO C ON A.PRD_CODE = C.PRD_CODE
+        WHERE A.PRD_CODE = #{prdCode}
+        GROUP BY A.PRD_IMG, A.PRD_DESC, A.SAFETY_STOCK, A.PRD_QTY, B.CL_NAME
+    </select>
+
+    <select id="setreactStockLog" resultMap="reactStockMap">
+        SELECT
+            A.PRD_CODE,
+            A.PRD_NAME,
+            A.PRD_QTY,
+            A.SAFETY_STOCK,
+            B.COM_NAME
+        FROM PRD_INFO A
+        JOIN MGCODE_INFO B ON A.PRD_STATUS = B.COM_CODE
+        WHERE PRD_STATUS = 'PD-P01'
+    </select>
+
+    <select id="setreactStockDateLog" resultMap="reactStockMap">
+        SELECT
+            A.STOCK_DATE,
+            A.PRD_CODE,
+            B.PRD_NAME,
+            C.PURCHASE_QTY,
+            D.IN_CHATGE,
+            A.NOTES
+        FROM STOCK_INFO A
+                 JOIN PRD_INFO B ON A.PRD_CODE = B.PRD_CODE
+                 JOIN PURCHASE_INFO C ON A.PRD_CODE = C.PRD_CODE
+                 JOIN VENDOR_INFO D ON C.VENDOR_CODE = D.VENDOR_CODE
+    </select>
+</mapper>

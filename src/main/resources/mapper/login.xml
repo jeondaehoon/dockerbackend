@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.camperxoffice.login.dao.loginDao">
+
+    <resultMap type= "com.vo.admin.AdminVO" id="LoginMap">
+        <result column="ADMIN_ID" property="adminId"/>
+        <result column="ADMIN_NAME" property="adminName"/>
+        <result column="POS_DEPT" property="posDept"/>
+        <result column="ADMIN_EMAIL" property="adminEmail"/>
+        <result column="ADMIN_PHONE" property="adminPhone"/>
+        <result column="ADMIN_PWD" property="adminPwd"/>
+        <result column="ADMIN_STATUS" property="adminStatus"/>
+        <result column="ADMIN_JDT" property="adminJdt"/>
+        <result column="ADMIN_DOB" property="adminDob"/>
+        <result column="ADMIN_LV" property="adminLv"/>
+        <result column="ADMIN_UNIT" property="adminUnit"/>
+        <result column="DEPT_UNIT" property="deptUnit"/>
+
+        <result column="VENDOR_CODE" property="vendorCode"/>
+        <result column="VENDOR_NAME" property="vendorName"/>
+        <result column="CEO_NAME" property="ceoName"/>
+        <result column="COMPANY_PHONE" property="companyPhone"/>
+        <result column="IN_CHATGE" property="inChatge"/>
+        <result column="CONTACT_PERSON" property="contactPerson"/>
+        <result column="CONTACT_EMAIL" property="contactEmail"/>
+
+        <result column="COM_CODE" property="comCode"/>
+        <result column="COM_NAME" property="comName"/>
+    </resultMap>
+    
+    <select id="setreactloginId" resultMap="LoginMap">
+        SELECT
+            ADMIN_ID,
+            ADMIN_PWD,
+            ADMIN_NAME
+        FROM ADMIN_INFO
+        WHERE ADMIN_ID=#{adminId}
+    </select>
+
+    <select id="setreactloginPwd" resultMap="LoginMap">
+        SELECT
+            ADMIN_PWD,
+            ADMIN_ID
+        FROM ADMIN_INFO
+        WHERE ADMIN_PWD=#{adminPwd}
+    </select>
+</mapper>

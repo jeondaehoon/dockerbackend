@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.camperxoffice.user.dao.userDao">
+    <resultMap type= "com.vo.user.UserVO" id="UserMap">
+        <result column="USER_ID" property="userId"/>
+        <result column="USER_NAME" property="userName"/>
+        <result column="USER_PWD" property="userPwd"/>
+        <result column="USER_EMAIL" property="userEmail"/>
+        <result column="USER_PHONE" property="userPhone"/>
+        <result column="USER_BASIC" property="userBasic"/>
+        <result column="JOIN_DATE" property="joinDate"/>
+        <result column="USER_STATUS" property="userStatus"/>
+        <result column="COM_NAME" property="comName"/>
+        <result column="ORD_CODE" property="ordCode"/>
+        <result column="PRD_CODE" property="prdCode"/>
+        <result column="BUY_QTY" property="buyQty"/>
+        <result column="ORD_DATE" property="ordDate"/>
+        <result column="USER_ADDRESS" property="userAddress"/>
+        <result column="POST_SEQ" property="postSeq"/>
+        <result column="CUST_CODE" property="custCode"/>
+        <result column="CUST_NAME" property="custName"/>
+        <result column="CUST_DESC" property="custDesc"/>
+        <result column="CUST_DATE" property="custDate"/>
+        <result column="CUST_COMMENT" property="custComment"/>
+        <result column="COMMENT_STATUS" property="commentStatus"/>
+        <result column="IN_CHATGE" property="inChatge"/>
+        <result column="CUST_MAINCODE" property="custMaincode"/>
+        <result column="ADMIN_ID" property="adminId"/>
+        <result column="ADMIN_NAME" property="adminName"/>
+    </resultMap>
+
+
+
+    <select id="setreactuserSearch" resultMap="UserMap">
+        SELECT
+            A.USER_ID,
+            A.USER_NAME,
+            A.USER_PHONE,
+            A.USER_EMAIL,
+            A.USER_BASIC,
+            B.COM_NAME
+        FROM USER_INFO A
+                 JOIN MGCODE_INFO B ON A.USER_STATUS = B.COM_CODE
+    </select>
+
+    <select id="setreactdetailSearch" resultMap="UserMap">
+        SELECT
+            A.ORD_CODE,
+            A.PRD_CODE,
+            A.BUY_QTY,
+            B.COM_NAME,
+            A.ORD_DATE,
+            C.USER_ADDRESS
+        FROM ORDER_INFO A
+                 JOIN MGCODE_INFO B ON A.ORDER_STATUS = B.COM_CODE
+                 JOIN USER_INFO C ON A.USER_ID = C.USER_ID
+        WHERE A.USER_ID = #{userId}
+    </select>
+
+    <select id="setreactcustSearch" resultMap="UserMap">
+        SELECT
+            A.POST_SEQ,
+            A.USER_ID,
+            D.USER_NAME,
+            B.COM_NAME AS CUST_CODE,
+            A.CUST_NAME,
+            A.CUST_DATE,
+            C.COM_NAME AS COMMENT_STATUS
+        FROM CUST_INFO A
+                 JOIN MGCODE_INFO B ON A.CUST_CODE = B.COM_CODE
+                 JOIN MGCODE_INFO C ON A.COMMENT_STATUS = C.COM_CODE
+                 JOIN USER_INFO D ON A.USER_ID = D.USER_ID
+    </select>
+
+    <select id="setreactcustDetailSearch" resultMap="UserMap">
+        SELECT
+            B.ADMIN_NAME,
+            A.CUST_COMMENT,
+            C.COM_NAME
+        FROM CUST_INFO A
+                 JOIN ADMIN_INFO B ON A.ADMIN_ID = B.ADMIN_ID
+                 JOIN MGCODE_INFO C ON A.COMMENT_STATUS = C.COM_CODE
+        WHERE A.USER_ID = #{userId}
+    </select>
+
+    <select id="setreactMaincodeSearch" resultMap="UserMap">
+        SELECT
+            CUST_MAINCODE
+        FROM CUST_INFO
+        WHERE COMMENT_STATUS = 'UR-U05'
+    </select>
+
+    <select id="setreactcustNamedescSearch" resultMap="UserMap">
+        SELECT
+            CUST_NAME,
+            CUST_DESC
+        FROM CUST_INFO
+        WHERE CUST_MAINCODE = #{custMaincode}
+    </select>
+
+    <update id="setreactcustUpdate">
+    UPDATE CUST_INFO
+        SET
+        CUST_COMMENT = #{custComment},
+        COMMENT_DATE = SYSDATE,
+        ADMIN_ID = #{adminId},
+        COMMENT_STATUS = 'CT-C10'
+        WHERE CUST_MAINCODE = #{custMaincode}
+    </update>
+</mapper>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.camperxoffice.admin.dao.adminDao">
+
+    <resultMap type= "com.vo.admin.AdminVO" id="AdminMap">
+        <result column="ADMIN_ID" property="adminId"/>
+        <result column="ADMIN_NAME" property="adminName"/>
+        <result column="POS_DEPT" property="posDept"/>
+        <result column="ADMIN_EMAIL" property="adminEmail"/>
+        <result column="ADMIN_PHONE" property="adminPhone"/>
+        <result column="ADMIN_PWD" property="adminPwd"/>
+        <result column="ADMIN_STATUS" property="adminStatus"/>
+        <result column="ADMIN_JDT" property="adminJdt"/>
+        <result column="ADMIN_DOB" property="adminDob"/>
+        <result column="ADMIN_LV" property="adminLv"/>
+        <result column="ADMIN_UNIT" property="adminUnit"/>
+        <result column="DEPT_UNIT" property="deptUnit"/>
+
+        <result column="VENDOR_CODE" property="vendorCode"/>
+        <result column="VENDOR_NAME" property="vendorName"/>
+        <result column="CEO_NAME" property="ceoName"/>
+        <result column="COMPANY_PHONE" property="companyPhone"/>
+        <result column="IN_CHATGE" property="inChatge"/>
+        <result column="CONTACT_PERSON" property="contactPerson"/>
+        <result column="CONTACT_EMAIL" property="contactEmail"/>
+
+        <result column="COM_CODE" property="comCode"/>
+        <result column="COM_NAME" property="comName"/>
+    </resultMap>
+
+    <select id="setAdminList" resultMap="AdminMap">
+        SELECT
+            ADMIN_ID,
+            ADMIN_NAME,
+            ADMIN_EMAIL,
+            POS_DEPT,
+            ADMIN_PHONE,
+            ADMIN_STATUS,
+            ADMIN_DOB,
+            ADMIN_Lv
+        FROM ADMIN_INFO
+        WHERE 1=1
+        <if test="adminId != null and adminId != ''">
+            AND ADMIN_ID LIKE '%' || #{adminId} || '%'
+        </if>
+    </select>
+
+    <insert id="adminAdd">
+        INSERT INTO ADMIN_INFO (ADMIN_ID, ADMIN_NAME, POS_DEPT, ADMIN_EMAIL, ADMIN_PHONE, ADMIN_PWD, ADMIN_STATUS, ADMIN_JDT)
+        VALUES (#{adminId}, #{adminName}, '사원', #{adminEmail}, #{adminPhone}, #{adminPwd}, '재직중', SYSDATE)
+    </insert>
+
+    <update id="adminLeave">
+        UPDATE ADMIN_INFO
+        SET ADMIN_STATUS = '퇴사'
+        WHERE ADMIN_ID = #{adminId}
+    </update>
+
+    <select id="setreactAdminSearch" resultMap="AdminMap">
+        SELECT
+            A.ADMIN_ID,
+            A.ADMIN_NAME,
+            A.ADMIN_EMAIL,
+            B.COM_NAME || '/' || C.COM_NAME AS DEPT_UNIT,
+            A.ADMIN_PHONE,
+            D.COM_NAME AS ADMIN_STATUS
+        FROM ADMIN_INFO A
+                 JOIN MGCODE_INFO B ON A.POS_DEPT = B.COM_CODE
+                 JOIN MGCODE_INFO C ON A.ADMIN_UNIT = C.COM_CODE
+                 JOIN MGCODE_INFO D ON A.ADMIN_STATUS = D.COM_CODE
+    </select>
+
+    <select id="setreactvendorSearch" resultMap="AdminMap">
+        SELECT
+            VENDOR_CODE,
+            VENDOR_NAME,
+            CEO_NAME,
+            COMPANY_PHONE,
+            IN_CHATGE,
+            CONTACT_PERSON,
+            CONTACT_EMAIL
+        FROM VENDOR_INFO
+        WHERE 1 = 1
+    </select>
+
+    <select id="setreactadminUnit" resultMap="AdminMap">
+        SELECT
+            COM_NAME,
+            COM_CODE
+        FROM MGCODE_INFO
+        WHERE COM_CODE IN ('AD-B01','AD-B02','AD-B03','AD-B04')
+    </select>
+
+    <insert id="setreactadminAdd">
+        INSERT INTO ADMIN_INFO(ADMIN_ID, ADMIN_NAME, POS_DEPT, ADMIN_EMAIL, ADMIN_PHONE, ADMIN_PWD, ADMIN_JDT, ADMIN_DOB, ADMIN_STATUS, ADMIN_UNIT)
+        VALUES(
+                  #{adminId},
+                  #{adminName},
+                  'AD-C05',
+                  #{adminEmail},
+                  #{adminPhone},
+                  #{adminPwd},
+                  SYSDATE,
+                  #{adminDob},
+                  'AD-A01',
+                  #{adminUnit}
+              )
+    </insert>
+
+    <insert id="setreactvendorAdd">
+        INSERT INTO VENDOR_INFO(VENDOR_CODE, VENDOR_NAME, IN_CHATGE, CONTACT_PERSON, CONTACT_EMAIL, CEO_NAME, COMPANY_PHONE)
+        VALUES(
+                  #{vendorCode},
+                  #{vendorName},
+                  #{inChatge},
+                  #{contactPerson},
+                  #{contactEmail},
+                  #{ceoName},
+                  #{companyPhone}
+              )
+    </insert>
+</mapper>
+
+
