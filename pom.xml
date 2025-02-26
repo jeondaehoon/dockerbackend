@@ -61,11 +61,7 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+		<!-- 삭제된 부분: 중복된 spring-boot-starter-test 의존성 -->
 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter-test</artifactId>
@@ -73,19 +69,16 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- 추가 항목 -->
-		<!-- 톰켓-->
+		<!-- 톰켓 관련 의존성 -->
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId> tomcat-embed-jasper </artifactId>
+			<artifactId>tomcat-embed-jasper</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
-			<artifactId> tomcat-catalina </artifactId>
+			<artifactId>tomcat-catalina</artifactId>
 			<version>9.0.45</version>
 		</dependency>
-
-
 
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -139,12 +132,20 @@
 			<version>1.26</version>
 		</dependency>
 
-		<!-- Spring Secure : BCrypt -->
+		<!-- Spring Security -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
 		</dependency>
+
+		<!-- Spring Boot Test 의존성 추가 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>

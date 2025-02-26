@@ -1,14 +1,24 @@
-# OpenJDK 11을 기반으로 이미지를 생성
-FROM openjdk:11-jre-slim
+# 1단계: Maven 빌드 환경
+FROM maven:3.4.0-openjdk-17 AS builder
 
-# 작업 디렉토리 생성
 WORKDIR /app
 
-# Maven 빌드된 JAR 파일을 복사
-COPY target/my-app.jar /app/my-app.jar
+# 프로젝트 소스 코드 복사
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# 포트 열기 (Spring Boot의 기본 포트 8080)
-EXPOSE 8080
+COPY src ./src
 
-# 애플리케이션 실행
-ENTRYPOINT ["java", "-jar", "my-app.jar"]
+# Maven으로 프로젝트 빌드
+RUN mvn clean package -DskipTests
+
+# 2단계: 런타임 환경 (JDK만 포함)
+FROM openjdk:17-jdk-slim
+
+WORKDIR /app
+
+# 빌드된 JAR 파일 복사
+COPY --from=builder /app/target/*.jar app.jar
+
+# 컨테이너 실행 시 JAR 실행
+CMD ["java", "-jar", "app.jar"]
