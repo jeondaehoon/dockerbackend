@@ -1,5 +1,5 @@
 # 1단계: Maven 빌드 환경
-FROM maven:3.9-openjdk-17-slim AS builder
+FROM maven:3.8.7-openjdk-17-slim AS builder
 
 WORKDIR /app
 
