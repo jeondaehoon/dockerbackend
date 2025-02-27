@@ -5,8 +5,8 @@ pipeline {
         IMAGE_NAME = "camperX-api"
         GIT_REPO = "https://github.com/jeondaehoon/dockerbackend.git"
         BRANCH_NAME = "deploy"
-        PATH = "/usr/bin:$PATH"
-    }
+        PATH = "/usr/bin:/usr/local/bin:/usr/sbin:$PATH"
+    }    
     stages {
         stage('Checkout') {
             steps {
