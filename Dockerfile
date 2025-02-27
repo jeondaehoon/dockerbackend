@@ -1,5 +1,5 @@
-# Step 1: Build stage1122
-FROM maven:3.9.9-openjdk-8 AS build
+# Step 1: Build stage112233
+FROM maven:3.9.9-openjdk-17 AS build
 
 # Set the working directory
 WORKDIR /app
