@@ -1,5 +1,5 @@
 # Step 1: Build stage
-FROM maven:3.8.4-openjdk-8 AS build
+FROM maven:3.9-openjdk-8 AS build
 
 # Set the working directory
 WORKDIR /app
