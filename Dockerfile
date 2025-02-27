@@ -1,24 +1,26 @@
-# Step 1: Build stage - Maven 3.9.0 + OpenJDK 17
-FROM maven:3.9.0-openjdk-17 AS build
+# 1. 기본 이미지로 OpenJDK 11을 사용
+FROM openjdk:11-jre-slim
 
-# Set the working directory
+# 2. Maven 설치
+RUN apt-get update && apt-get install -y maven
+
+# 3. 작업 디렉토리 설정
 WORKDIR /app
 
-# Copy Maven project files (pom.xml first to leverage Docker cache)
-COPY pom.xml .  
-COPY src ./src  # Copy the source code
+# 4. Maven 빌드 파일을 복사
+COPY pom.xml .
 
-# Build the Maven project
+# 5. 종속성만 먼저 다운로드하여 캐시를 사용하여 빌드 최적화
+RUN mvn dependency:go-offline
+
+# 6. 전체 프로젝트 파일을 복사
+COPY . .
+
+# 7. Maven으로 프로젝트 빌드 (패키징)
 RUN mvn clean package -DskipTests
 
-# Step 2: Runtime stage - OpenJDK 17 (optional JDK 17 image for consistency)
-FROM openjdk:17-jdk-alpine  # Correct JDK 17 base image for runtime
+# 8. 빌드된 JAR 파일을 실행
+CMD ["java", "-jar", "target/your-app-name.jar"]
 
-# Set the working directory
-WORKDIR /app
-
-# Copy the JAR file from the build stage
-COPY --from=build /app/target/my-app-1.0-SNAPSHOT.jar /app/my-app-1.0-SNAPSHOT.jar
-
-# Run the JAR file
-CMD ["java", "-jar", "/app/my-app-1.0-SNAPSHOT.jar"]
+# 9. 컨테이너가 외부와 연결될 포트 설정
+EXPOSE 8080
