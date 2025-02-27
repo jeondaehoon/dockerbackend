@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_COMPOSE_FILE = '/home/ubuntu/docker-compose.yml'
-        IMAGE_NAME = "camperx-api"
+        IMAGE_NAME = "camperx-api" 
         GIT_REPO = "https://github.com/jeondaehoon/dockerbackend.git"
         BRANCH_NAME = "deploy"
     }
@@ -10,6 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
+                    // Git 저장소에서 배포할 브랜치 가져오기
                     git branch: "${BRANCH_NAME}", url: "${GIT_REPO}"
                 }
             }
@@ -18,13 +19,13 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // 현재 날짜를 "yyyyMMdd" 형식으로 얻기
+                    // 현재 날짜를 "yyyyMMddHHmm" 형식으로 얻기
                     def now = new Date().format("yyyyMMddHHmm")
                     def OLD_TAG = now 
                     
-                    // Docker 이미지를 빌드한 후, 태그를 추가
+                    // Docker 이미지 빌드
+                    echo "Building Docker image with tag ${OLD_TAG}"
                     sh "docker build -t ${IMAGE_NAME}:${OLD_TAG} ."
-                    sh "docker tag ${IMAGE_NAME}:${OLD_TAG} ${IMAGE_NAME}:latest" // 최신 태그를 추가
                 }
             }
         }
@@ -39,11 +40,8 @@ pipeline {
                     }
 
                     // Docker 이미지를 푸시
-                    echo "Pushing Docker image"
-                    def now = new Date().format("yyyyMMddHHmm")
-                    OLD_TAG = now
+                    echo "Pushing Docker image ${IMAGE_NAME}:${OLD_TAG} to Docker Hub"
                     sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${OLD_TAG}"
-                    sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:latest" // 최신 태그도 푸시
                 }
             }
         }
@@ -51,10 +49,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // 새로 만들어진 이미지를 배포 실행한다
-                    echo "Deploying with docker-compose..."
                     // Docker Compose로 배포
-                    sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} up -d'
+                    echo "Deploying with docker-compose..."
+                    sh "docker-compose -f ${DOCKER_COMPOSE_FILE} up -d"
                 }
             }
         }
