@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_COMPOSE_FILE = '/home/ubuntu/docker-compose.yml'
-        IMAGE_NAME = "camperx-api" 
+        IMAGE_NAME = "camperx-api"
         GIT_REPO = "https://github.com/jeondaehoon/dockerbackend.git"
         BRANCH_NAME = "deploy"
     }
@@ -22,10 +22,9 @@ pipeline {
                     def now = new Date().format("yyyyMMddHHmm")
                     def OLD_TAG = now 
                     
-                    // Docker 이미지 태그 붙이기
-                    // 태그에 날짜를 추가함으로써 이미지버전에 대한 태그를 관리하는데 유용함
-                    sh "docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${OLD_TAG}"
+                    // Docker 이미지를 빌드한 후, 태그를 추가
                     sh "docker build -t ${IMAGE_NAME}:${OLD_TAG} ."
+                    sh "docker tag ${IMAGE_NAME}:${OLD_TAG} ${IMAGE_NAME}:latest" // 최신 태그를 추가
                 }
             }
         }
@@ -44,6 +43,7 @@ pipeline {
                     def now = new Date().format("yyyyMMddHHmm")
                     OLD_TAG = now
                     sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${OLD_TAG}"
+                    sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:latest" // 최신 태그도 푸시
                 }
             }
         }
