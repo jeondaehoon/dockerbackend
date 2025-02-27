@@ -1,4 +1,4 @@
-# 1단계: Maven 빌드 환경112233
+# 1단계: Maven 빌드 환경11223344
 FROM maven:3.6.3-openjdk-17 AS builder
 
 WORKDIR /app
