@@ -12,7 +12,7 @@ COPY src ./src  # Copy the source code
 RUN mvn clean package -P alzza -DskipTests
 
 # Step 2: Runtime stage - OpenJDK 17 (optional JDK 17 image for consistency)
-FROM openjdk:17-jdk-alpine  # JDK 17 for consistency
+FROM openjdk:17-jdk-alpine  # Correct JDK 17 base image for runtime
 
 # Set the working directory
 WORKDIR /app
