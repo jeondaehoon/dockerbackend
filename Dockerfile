@@ -1,24 +1,24 @@
-# 1단계: Maven 빌드 환경
-FROM maven:3.8.7-openjdk-17-slim AS builder
+# Step 1: Build stage
+FROM maven:3.8.4-openjdk-8 AS build
 
+# Set the working directory
 WORKDIR /app
 
-# 프로젝트 소스 코드 복사
+# Copy Maven project files
 COPY pom.xml .
-RUN mvn dependency:go-offline
-
 COPY src ./src
 
-# Maven으로 프로젝트 빌드
-RUN mvn clean package -DskipTests
+# Build the Maven project
+RUN mvn clean package -P alzza -DskipTests
 
-# 2단계: 런타임 환경 (JDK만 포함)
-FROM openjdk:17-jdk-slim
+# Step 2: Runtime stage
+FROM openjdk:8-jdk-alpine
 
+# Set the working directory
 WORKDIR /app
 
-# 빌드된 JAR 파일 복사
-COPY --from=builder /app/target/*.jar app.jar
+# Copy the JAR file from the build stage
+COPY --from=build /app/target/your-app-name.jar /app/your-app-name.jar
 
-# 컨테이너 실행 시 JAR 실행
-CMD ["java", "-jar", "app.jar"]
+# Run the JAR file
+CMD ["java", "-jar", "/app/your-app-name.jar"]
