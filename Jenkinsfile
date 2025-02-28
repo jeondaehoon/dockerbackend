@@ -30,9 +30,11 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         echo "Logging into Docker Hub"
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                        // Docker login 수정
+                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
 
                         echo "Pushing Docker image to DockerHub"
+                        // docker push 명령어 확인
                         sh "docker push ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION}"
                     }
                 }
