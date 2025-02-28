@@ -43,7 +43,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         echo "Logging into Docker Hub"
-                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                        sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
                         echo "Pushing Docker image to DockerHub"
                         def now = new Date().format("yyyyMMddHHmm")
                         sh "docker push ascdee1234/camperx-api:${now}"
