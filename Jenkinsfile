@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/jeondaehoon/dockerbackend.git'
+                git branch: 'deploy', url: 'https://github.com/jeondaehoon/dockerbackend.git'
             }
         }
 
