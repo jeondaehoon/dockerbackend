@@ -22,7 +22,7 @@ pipeline {
                 script {
                     docker.image('maven:3.8.4').inside("--entrypoint=''") {
                         echo "Building Java project with Maven inside Docker"
-                        sh 'mvn clean install -P alzza -DskipTests'
+                        sh 'mvn clean install -P alzza -DskipTests spring-boot:repackage'
                     }
                 }
             }
@@ -57,10 +57,10 @@ pipeline {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh', keyFileVariable: 'SSH_KEY_PATH', usernameVariable: 'SSH_USER')]) {
                         echo "Deploying to EC2"
                         sh(script: """
-                            ssh -i $SSH_KEY_PATH $SSH_USER@52.79.219.130 << 'EOF'
-                                cd /home/ubuntu/docker-app
+                            ssh -i $SSH_KEY_PATH -o StrictHostKeyChecking=no $SSH_USER@52.79.219.130 << 'EOF'
+                                cd /home/ubuntu
                                 docker-compose pull
-                                docker-compose up -d --no-deps --force-recreate camperx-api
+                                docker-compose up -d --force-recreate web
                             EOF
                         """, returnStatus: true)
                     }
