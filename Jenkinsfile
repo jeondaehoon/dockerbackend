@@ -1,34 +1,25 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_COMPOSE_FILE = '/home/ubuntu/docker-compose.yml'
-        IMAGE_NAME = "camperx-api"
-        GIT_REPO = "https://github.com/jeondaehoon/dockerbackend.git"
-        BRANCH_NAME = "deploy"
+        DOCKER_IMAGE = "camperx-api"
+        VERSION = "202502281402"
+        EC2_IP = "52.79.219.130"
+        JAR_FILE = "CamperXoffice-0.0.1-SNAPSHOT.jar"
     }
+
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    // Git 저장소에서 배포할 브랜치 가져오기
-                    git branch: "${BRANCH_NAME}", url: "${GIT_REPO}"
-                }
+                git branch: 'main', url: 'https://github.com/jeondaehoon/dockerbackend.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    // 현재 날짜를 "yyyyMMddHHmm" 형식으로 얻기
-                    def now = new Date().format("yyyyMMddHHmm")
-                    def OLD_TAG = now  // 현재 시간을 태그로 사용
-
-                    // 환경 변수로 설정
-                    env.OLD_TAG = OLD_TAG
-
-                    // Docker 이미지 빌드
-                    echo "Building Docker image with tag ${OLD_TAG}"
-                    sh "docker build -t ${IMAGE_NAME}:${OLD_TAG} ."
+                    echo "Building Docker image with tag ${VERSION}"
+                    sh "docker build -t ${DOCKER_IMAGE}:${VERSION} ."
                 }
             }
         }
@@ -36,25 +27,24 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Docker Hub에 로그인
-                    echo "Logging in to Docker Hub..."
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
-                    }
-
-                    // Docker 이미지를 푸시
-                    echo "Pushing Docker image ${IMAGE_NAME}:${OLD_TAG} to Docker Hub"
-                    sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${OLD_TAG}"
+                    // DockerHub에 로그인 (자격증명 설정 필요)
+                    echo "Pushing Docker image to DockerHub"
+                    sh "docker push ${DOCKER_IMAGE}:${VERSION}"
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to EC2') {
             steps {
                 script {
-                    // Docker Compose로 배포
-                    echo "Deploying with docker-compose..."
-                    sh "DOCKER_USERNAME=${DOCKER_USERNAME} OLD_TAG=${OLD_TAG} docker-compose -f ${DOCKER_COMPOSE_FILE} up -d --build --force-recreate"
+                    // EC2로 Docker 이미지 배포
+                    echo "Deploying to EC2"
+                    sh """
+                    ssh -i /path/to/your-key.pem ubuntu@${EC2_IP} << EOF
+                    docker pull ${DOCKER_IMAGE}:${VERSION}
+                    docker run -d -p 8080:8080 --name camperx-api ${DOCKER_IMAGE}:${VERSION}
+                    EOF
+                    """
                 }
             }
         }
