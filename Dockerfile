@@ -9,5 +9,4 @@ RUN mvn clean package -P alzza -DskipTests
 FROM openjdk:17-jdk
 WORKDIR /app
 COPY --from=build /app/target/*.jar /app/
-# jar 파일 실행
 ENTRYPOINT ["java", "-jar", "/app/CamperXoffice-0.0.1-SNAPSHOT.jar"]
