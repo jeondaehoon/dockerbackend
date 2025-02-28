@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     // Docker 안에서 Maven을 사용하여 Java 프로젝트를 빌드
-                    docker.image('maven:3.8.4').inside {
+                    docker.image('maven:3.8.4').inside("--entrypoint=''") {
                         echo "Building Java project with Maven inside Docker"
                         sh 'mvn clean install -P alzza -DskipTests' // Maven 빌드 명령어
                     }
