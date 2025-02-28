@@ -12,7 +12,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'deploy', url: 'https://github.com/jeondaehoon/dockerbackend.git'
+                script {
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'Github-credentials', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
+                        git branch: 'deploy', url: 'https://github.com/jeondaehoon/dockerbackend.git', credentialsId: 'Github-credentials'
+                    }
+                }
             }
         }
 
