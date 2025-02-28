@@ -57,13 +57,13 @@ pipeline {
                 script {
                     withCredentials([[$class: 'SSHUserPrivateKey', credentialsId: 'SSH_KEY', keyFileVariable: 'SSH_KEY_PATH', usernameVariable: 'SSH_USER']]) {
                         echo "Deploying to EC2"
-                        sh """
-                            ssh -o StrictHostKeyChecking=no -i $SSH_KEY_PATH $SSH_USER@ec2-instance-ip << 'EOF'
+                        sh(script: """
+                            ssh -i $SSH_KEY_PATH $SSH_USER@52.79.219.130 << 'EOF'
                                 cd /home/ubuntu/docker-app
                                 docker-compose pull
                                 docker-compose up -d
                             EOF
-                        """
+                        """, returnStatus: true)
                     }
                 }
             }
