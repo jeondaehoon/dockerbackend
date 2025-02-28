@@ -55,7 +55,7 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    withCredentials([[$class: 'SSHUserPrivateKey', credentialsId: 'ec2-ssh-keyubuntu', keyFileVariable: 'SSH_KEY_PATH', usernameVariable: 'SSH_USER']]) {
+                    withCredentials([[$class: 'SSHUserPrivateKey', credentialsId: 'ec2-ssh', keyFileVariable: 'SSH_KEY_PATH', usernameVariable: 'SSH_USER']]) {
                         echo "Deploying to EC2"
                         sh(script: """
                             ssh -i $SSH_KEY_PATH $SSH_USER@52.79.219.130 << 'EOF'
