@@ -17,6 +17,15 @@ pipeline {
             }
         }
 
+        stage('Build Java Project') {
+            steps {
+                script {
+                    echo "Building Java project with Maven"
+                    sh "mvn clean install"  // Maven을 사용해 JAR 파일 빌드
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -46,17 +55,10 @@ pipeline {
                 script {
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'SSH_KEY', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASSWORD']]) {
                         echo "Deploying to EC2"
-
                         sh """
-                            # EC2에 접속하여 docker-compose.yml 파일을 복사
-                            scp -i /path/to/your/private/key docker-compose.yml $SSH_USER@ec2-instance-ip:/home/ubuntu/docker-app
-
-                            # SSH를 통해 EC2에 접속하여 Docker Compose 실행
                             ssh -o StrictHostKeyChecking=no -i /path/to/your/private/key $SSH_USER@ec2-instance-ip << 'EOF'
                                 cd /home/ubuntu/docker-app
-                                # 최신 이미지를 Pull
                                 docker-compose pull
-                                # 기존 컨테이너 중지 및 삭제 후 새 이미지로 컨테이너 시작
                                 docker-compose up -d
                             EOF
                         """
