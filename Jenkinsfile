@@ -66,7 +66,9 @@ pipeline {
                         sh(script: """
                             ssh -i $SSH_KEY_PATH $SSH_USER@52.79.219.130 << 'EOF'
                                 cd /home/ubuntu/docker-app
-                                # Docker Compose 파일을 최신 상태로 가져오고
+                                # 이전 Docker Compose 실행된 컨테이너와 네트워크 종료 및 정리
+                                docker-compose down
+                                # 최신 Docker Compose 이미지 풀
                                 docker-compose pull
                                 # Docker Compose로 컨테이너 실행
                                 docker-compose up -d
