@@ -46,11 +46,11 @@ pipeline {
                         echo "Deploying to EC2"
                         sh """
                         ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ubuntu@${EC2_IP} << EOF
-                        docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
-                        docker pull ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION}
-                        docker stop camperx-api || true
-                        docker rm camperx-api || true
-                        docker run -d -p 8080:8080 --name camperx-api ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION}
+                        sudo docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                        sudo docker pull ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION}
+                        sudo docker stop camperx-api || true
+                        sudo docker rm camperx-api || true
+                        sudo docker run -d -p 8080:8080 --name camperx-api ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION}
                         EOF
                         """
                     }
