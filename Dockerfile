@@ -1,24 +1,14 @@
-# 1단계: Maven 빌드 환경2222
-FROM maven:3.4.0-openjdk-17 AS builder
+# OpenJDK 17 이미지를 기반으로 설정
+FROM openjdk:17-jdk
 
-WORKDIR /app
+# /tmp 디렉토리를 볼륨으로 설정
+VOLUME /tmp
 
-# 프로젝트 소스 코드 복사
-COPY pom.xml .
-RUN mvn dependency:go-offline
+# 빌드된 JAR 파일의 경로를 설정
+ARG JAR_FILE=target/*.jar
 
-COPY src ./src
+# JAR 파일을 컨테이너에 복사
+COPY ${JAR_FILE} app.jar
 
-# Maven으로 프로젝트 빌드
-RUN mvn clean package -DskipTests
-
-# 2단계: 런타임 환경 (JDK만 포함)
-FROM openjdk:17-jdk-slim
-
-WORKDIR /app
-
-# 빌드된 JAR 파일 복사
-COPY --from=builder /app/target/*.jar app.jar
-
-# 컨테이너 실행 시 JAR 실행
-CMD ["java", "-jar", "app.jar"]
+# 컨테이너 시작 시 JAR 파일 실행
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]
