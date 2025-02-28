@@ -1,4 +1,4 @@
-# OpenJDK 17 이미지를 기반으로 설정11
+# OpenJDK 17 이미지를 기반으로 설정1122
 FROM openjdk:17-jdk
 
 # /tmp 디렉토리를 볼륨으로 설정
