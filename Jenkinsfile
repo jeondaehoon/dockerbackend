@@ -19,12 +19,14 @@ pipeline {
 
         stage('Build Java Project') {
             steps {
-                script {
-                    echo "Building Java project with Maven"
-                    sh "mvn clean install"  // Maven을 사용해 JAR 파일 빌드
+                    script {
+                        docker.image('maven:3.8.4').inside {
+                            echo "Building Java project with Maven inside Docker"
+                            sh 'mvn clean install -P alzza -DskipTests'
+                        }
+                    }
                 }
             }
-        }
 
         stage('Build Docker Image') {
             steps {
