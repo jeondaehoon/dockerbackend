@@ -2,10 +2,13 @@ pipeline {
     agent any
 
     environment {
+        DOCKER_USERNAME = credentials('docker-hub-username')  // Jenkins Credentials ID
+        DOCKER_PASSWORD = credentials('docker-hub-password')  // Jenkins Credentials ID
         DOCKER_IMAGE = "camperx-api"
         VERSION = "202502281402"
         EC2_IP = "52.79.219.130"
         JAR_FILE = "CamperXoffice-0.0.1-SNAPSHOT.jar"
+        DOCKER_REPO = "jeondaehoon"  // Docker Hub 계정명
     }
 
     stages {
@@ -19,7 +22,7 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image with tag ${VERSION}"
-                    sh "docker build -t ${DOCKER_IMAGE}:${VERSION} ."
+                    sh "docker build -t ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION} ."
                 }
             }
         }
@@ -27,9 +30,11 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // DockerHub에 로그인 (자격증명 설정 필요)
+                    echo "Logging into Docker Hub"
+                    sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+
                     echo "Pushing Docker image to DockerHub"
-                    sh "docker push ${DOCKER_IMAGE}:${VERSION}"
+                    sh "docker push ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION}"
                 }
             }
         }
@@ -37,12 +42,14 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    // EC2로 Docker 이미지 배포
                     echo "Deploying to EC2"
                     sh """
-                    ssh -i /path/to/your-key.pem ubuntu@${EC2_IP} << EOF
-                    docker pull ${DOCKER_IMAGE}:${VERSION}
-                    docker run -d -p 8080:8080 --name camperx-api ${DOCKER_IMAGE}:${VERSION}
+                    ssh -o StrictHostKeyChecking=no -i /path/to/your-key.pem ubuntu@${EC2_IP} << EOF
+                    docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                    docker pull ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION}
+                    docker stop camperx-api || true
+                    docker rm camperx-api || true
+                    docker run -d -p 8080:8080 --name camperx-api ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION}
                     EOF
                     """
                 }
