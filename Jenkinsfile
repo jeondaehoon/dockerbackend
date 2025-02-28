@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_COMPOSE_FILE = '/home/ubuntu/docker-compose.yml' // 실제 경로로 수정
+        DOCKER_COMPOSE_FILE = '/home/ubuntu/docker-compose.yml'
         IMAGE_NAME = "camperx-api"
         GIT_REPO = "https://github.com/jeondaehoon/dockerbackend.git"
         BRANCH_NAME = "deploy"
@@ -10,7 +10,9 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    git branch: "${BRANCH_NAME}", url: "${GIT_REPO}"
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'Github-credentials', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
+                        git branch: "${BRANCH_NAME}", url: "${GIT_REPO}", credentialsId: 'Github-credentials'
+                    }
                 }
             }
         }
@@ -21,8 +23,8 @@ pipeline {
                     def now = new Date().format("yyyyMMddHHmm")
                     def OLD_TAG = now
 
-                    sh "docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${OLD_TAG}"
-                    sh "docker build -t ${IMAGE_NAME}:${OLD_TAG} ."
+                    sh "docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${OLD_TAG} || true"
+                    sh "docker build -t ${IMAGE_NAME}:${OLD_TAG} . || exit 1"
                 }
             }
         }
@@ -37,7 +39,7 @@ pipeline {
 
                     echo "Pushing Docker image"
                     def now = new Date().format("yyyyMMddHHmm")
-                    OLD_TAG = now
+                    def OLD_TAG = now
                     sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${OLD_TAG}"
                 }
             }
@@ -47,7 +49,7 @@ pipeline {
             steps {
                 script {
                     echo "Deploying with docker-compose..."
-                    sh "docker-compose -f ${DOCKER_COMPOSE_FILE} up -d || exit 1" // 오류 처리 추가
+                    sh "docker-compose -f ${DOCKER_COMPOSE_FILE} up -d || exit 1"
                 }
             }
         }
