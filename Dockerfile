@@ -1,26 +1,14 @@
-# 1. 기본 이미지로 OpenJDK 11을 사용
-FROM openjdk:11-jre-slim
+# OpenJDK 17 이미지를 기반으로 설정
+FROM openjdk:17-jdk
 
-# 2. Maven 설치
-RUN apt-get update && apt-get install -y maven
+# /tmp 디렉토리를 볼륨으로 설정
+VOLUME /tmp
 
-# 3. 작업 디렉토리 설정
-WORKDIR /app
+# 빌드된 JAR 파일의 경로를 설정
+ARG JAR_FILE=target/*.jar
 
-# 4. Maven 빌드 파일을 복사
-COPY pom.xml .
+# JAR 파일을 컨테이너에 복사
+COPY ${JAR_FILE} app.jar
 
-# 5. 종속성만 먼저 다운로드하여 캐시를 사용하여 빌드 최적화
-RUN mvn dependency:go-offline
-
-# 6. 전체 프로젝트 파일을 복사
-COPY . .
-
-# 7. Maven으로 프로젝트 빌드 (패키징)
-RUN mvn clean package -DskipTests
-
-# 8. 빌드된 JAR 파일을 실행
-CMD ["java", "-jar", "target/your-app-name.jar"]
-
-# 9. 컨테이너가 외부와 연결될 포트 설정
-EXPOSE 8080
+# 컨테이너 시작 시 JAR 파일 실행
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app.jar"]
