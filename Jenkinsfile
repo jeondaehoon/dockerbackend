@@ -1,30 +1,54 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.8.4-openjdk-17'
-        }
+    agent any
+    environment {
+        DOCKER_COMPOSE_FILE = '/home/ubuntu/docker-compose.yml' // 실제 경로로 수정
+        IMAGE_NAME = "camperx-api"
+        GIT_REPO = "https://github.com/jeondaehoon/dockerbackend.git"
+        BRANCH_NAME = "deploy"
     }
     stages {
-        stage('Build') {
-            steps {
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-        stage('Docker Build') {
+        stage('Checkout') {
             steps {
                 script {
-                    def app = docker.build("ascdee1234/my-spring-boot-app:${BUILD_NUMBER}", '.')
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        app.push()
-                    }
+                    git branch: "${BRANCH_NAME}", url: "${GIT_REPO}"
                 }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def now = new Date().format("yyyyMMddHHmm")
+                    def OLD_TAG = now
+
+                    sh "docker tag ${IMAGE_NAME}:latest ${IMAGE_NAME}:${OLD_TAG}"
+                    sh "docker build -t ${IMAGE_NAME}:${OLD_TAG} ."
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    echo "Logging in to Docker Hub..."
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                    }
+
+                    echo "Pushing Docker image"
+                    def now = new Date().format("yyyyMMddHHmm")
+                    OLD_TAG = now
+                    sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${OLD_TAG}"
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
-                sh 'docker stop my-spring-boot-container'
-                sh 'docker rm my-spring-boot-container'
-                sh 'docker run -d -p 80:8080 ascdee1234/my-spring-boot-app:${BUILD_NUMBER} --name my-spring-boot-container'
+                script {
+                    echo "Deploying with docker-compose..."
+                    sh "docker-compose -f ${DOCKER_COMPOSE_FILE} up -d || exit 1" // 오류 처리 추가
+                }
             }
         }
     }
