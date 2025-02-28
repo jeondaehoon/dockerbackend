@@ -6,7 +6,7 @@ pipeline {
         VERSION = "202502281402"
         EC2_IP = "52.79.219.130"
         JAR_FILE = "CamperXoffice-0.0.1-SNAPSHOT.jar"
-        DOCKER_REPO = "jeondaehoon"  // Docker Hub 계정명
+        DOCKER_REPO = "ascdee1234"
     }
 
     stages {
@@ -30,11 +30,9 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                         echo "Logging into Docker Hub"
-                        // Docker login 수정
                         sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
 
                         echo "Pushing Docker image to DockerHub"
-                        // docker push 명령어 확인
                         sh "docker push ${DOCKER_REPO}/${DOCKER_IMAGE}:${VERSION}"
                     }
                 }
