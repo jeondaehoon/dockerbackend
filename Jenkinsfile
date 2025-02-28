@@ -21,9 +21,8 @@ pipeline {
             steps {
                 script {
                     def now = new Date().format("yyyyMMddHHmm")
-                    def OLD_TAG = now
-                    echo "Building Docker image with tag ${OLD_TAG}"
-                    sh "docker build -t ascdee1234/camperx-api:${OLD_TAG} ."
+                    echo "Building Docker image with tag ${now}"
+                    sh "docker build -t ascdee1234/camperx-api:${now} ."
                 }
             }
         }
@@ -36,8 +35,7 @@ pipeline {
                         sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
                         echo "Pushing Docker image to DockerHub"
                         def now = new Date().format("yyyyMMddHHmm")
-                        def OLD_TAG = now
-                        sh "docker push ascdee1234/camperx-api:${OLD_TAG}"
+                        sh "docker push ascdee1234/camperx-api:${now}"
                     }
                 }
             }
@@ -48,7 +46,20 @@ pipeline {
                 script {
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'SSH_KEY', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASSWORD']]) {
                         echo "Deploying to EC2"
-                        // EC2 배포 관련 스크립트 추가
+
+                        sh """
+                            # EC2에 접속하여 docker-compose.yml 파일을 복사
+                            scp -i /path/to/your/private/key docker-compose.yml $SSH_USER@ec2-instance-ip:/home/ubuntu/docker-app
+
+                            # SSH를 통해 EC2에 접속하여 Docker Compose 실행
+                            ssh -o StrictHostKeyChecking=no -i /path/to/your/private/key $SSH_USER@ec2-instance-ip << 'EOF'
+                                cd /home/ubuntu/docker-app
+                                # 최신 이미지를 Pull
+                                docker-compose pull
+                                # 기존 컨테이너 중지 및 삭제 후 새 이미지로 컨테이너 시작
+                                docker-compose up -d
+                            EOF
+                        """
                     }
                 }
             }
