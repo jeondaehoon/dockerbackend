@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     docker.image('maven:3.8.4').inside("--entrypoint=''") {
-                        echo "Building Java project with Maven inside Docker"
+                        echo "Docker 내부에서 Maven을 사용하여 Java 프로젝트 빌드 중"
                         sh 'mvn clean install -P alzza -DskipTests spring-boot:repackage'
                     }
                 }
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 script {
                     env.IMAGE_TAG = new Date().format("yyyyMMddHHmm")
-                    echo "Building Docker image with tag ${env.IMAGE_TAG}"
+                    echo "태그 ${env.IMAGE_TAG}로 Docker 이미지 빌드 중"
                     sh "docker build -t ascdee1234/camperx-api:${env.IMAGE_TAG} ."
                 }
             }
@@ -42,9 +42,9 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        echo "Logging into Docker Hub"
+                        echo "Docker Hub에 로그인 중"
                         sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
-                        echo "Pushing Docker image to DockerHub"
+                        echo "Docker 이미지를 Docker Hub에 푸시 중"
                         sh "docker push ascdee1234/camperx-api:${env.IMAGE_TAG}"
                     }
                 }
@@ -55,7 +55,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh', keyFileVariable: 'SSH_KEY_PATH', usernameVariable: 'SSH_USER')]) {
-                        echo "Deploying to EC2"
+                        echo "EC2에 배포 중"
                         sh(script: """
                             ssh -i $SSH_KEY_PATH $SSH_USER@52.79.219.130 << 'EOF'
                                 set -x
