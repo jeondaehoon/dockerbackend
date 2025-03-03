@@ -57,10 +57,15 @@ pipeline {
                     withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh', keyFileVariable: 'SSH_KEY_PATH', usernameVariable: 'SSH_USER')]) {
                         echo "Deploying to EC2"
                         sh(script: """
-                            ssh -i $SSH_KEY_PATH -o StrictHostKeyChecking=no $SSH_USER@52.79.219.130 << 'EOF'
+                            ssh -i $SSH_KEY_PATH $SSH_USER@52.79.219.130 << 'EOF'
+                                set -x
                                 cd /home/ubuntu
                                 docker-compose pull
                                 docker-compose up -d --force-recreate web
+                                if [ \$? -ne 0 ]; then
+                                    echo "docker-compose 배포 실패"
+                                    exit 1
+                                fi
                             EOF
                         """, returnStatus: true)
                     }
