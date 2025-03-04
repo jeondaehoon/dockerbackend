@@ -31,10 +31,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def IMAGE_TAG = new Date().format("yyyyMMddHHmm")
-                    echo "태그 ${IMAGE_TAG}로 Docker 이미지 빌드 중"
-                    sh "docker build -t ascdee1234/camperx-api:${IMAGE_TAG} ."
-                    sh "docker tag ascdee1234/camperx-api:${IMAGE_TAG} ascdee1234/camperx-api:latest"
+                    env.IMAGE_TAG = new Date().format("yyyyMMddHHmm")
+                    echo "태그 ${env.IMAGE_TAG}로 Docker 이미지 빌드 중"
+                    sh "docker build -t ascdee1234/camperx-api:${env.IMAGE_TAG} ."
                 }
             }
         }
@@ -47,7 +46,6 @@ pipeline {
                         sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
                         echo "Docker 이미지를 Docker Hub에 푸시 중"
                         sh "docker push ascdee1234/camperx-api:${env.IMAGE_TAG}"
-                        sh "docker push ascdee1234/camperx-api:latest"
                     }
                 }
             }
