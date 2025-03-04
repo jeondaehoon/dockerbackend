@@ -54,7 +54,7 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh', keyFileVariable: 'SSH_KEY_PATH', usernameVariable: 'SSH_USER')]) {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh2', keyFileVariable: 'SSH_KEY_PATH', usernameVariable: 'SSH_USER')]) {
                         echo "EC2에 배포 중"
                         sh(script: """
                             ssh -i $SSH_KEY_PATH $SSH_USER@52.79.219.130 << 'EOF'
