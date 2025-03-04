@@ -31,7 +31,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    env.IMAGE_TAG = new Date().format("yyyyMMddHHmm")
+                    env.IMAGE_TAG = "latest"
                     echo "태그 ${env.IMAGE_TAG}로 Docker 이미지 빌드 중"
                     sh "docker build -t ascdee1234/camperx-api:${env.IMAGE_TAG} ."
                 }
